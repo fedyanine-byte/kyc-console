@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { QUESTIONS } from '../data/cases'
 import {
-  useGame, caseById, startGame, newSession, setPhase, score, MAX_SCORE,
+  useGame, caseById, startGame, nextRound, newSession, setPhase, score, MAX_SCORE,
   RISK_LABEL, RISK_COLOR, DEC_LABEL, DEC_COLOR, riskOk, decOk,
 } from '../lib'
 
@@ -45,12 +45,17 @@ export default function Presenter() {
         </div>
         <div style={{ flex: 1 }} />
         <div className="stat">STATUS <b className="glow" style={{ marginLeft: 6 }}>{phase.toUpperCase()}</b></div>
+        {game?.round > 0 && phase !== 'lobby' && <div className="stat">ROUND <b className="glow">{game.round}</b></div>}
         <div className="stat">TEAMS <b>{teams.length}</b></div>
         <div className="stat">SUBMITTED <b style={{ color: 'var(--green)' }}>{submitted}</b>/{teams.length}</div>
         {phase !== 'lobby' && phase !== 'none' && <div className="stat">ELAPSED <b>{mmss}</b></div>}
         <div className="stat"><b style={{ fontWeight: 200 }}>{clock.toLocaleTimeString('en-GB')}</b></div>
         <div style={{ display: 'flex', gap: 8 }}>
-          {(phase === 'none' || phase === 'reveal') && <button className="btn solid" onClick={() => newSession()}>New session</button>}
+          {phase === 'reveal' && teams.length > 0 && (
+            <button className="btn solid" onClick={() => { if (confirm('Start the next round with the same teams and new clients?')) nextRound() }}>Next round · same teams</button>
+          )}
+          {phase === 'reveal' && <button className="btn red" onClick={() => { if (confirm('New session? All teams must join again.')) newSession() }}>New session</button>}
+          {phase === 'none' && <button className="btn solid" onClick={() => newSession()}>New session</button>}
           {phase === 'lobby' && <button className="btn solid" disabled={!teams.length} onClick={startGame}>Assign clients · Start</button>}
           {phase === 'play' && <button className="btn" onClick={() => setPhase('locked')}>Lock answers</button>}
           {(phase === 'play' || phase === 'locked') && <button className="btn green" onClick={() => setPhase('reveal')}>Reveal</button>}
@@ -94,6 +99,7 @@ export default function Presenter() {
               <th style={{ width: 110 }}>DECISION</th>
               {reveal && <th className="sys-h" colSpan={2}>◆ SYSTEM VERDICT</th>}
               {reveal && <th style={{ width: 60 }}>SCORE</th>}
+              {reveal && game?.round > 1 && <th style={{ width: 60 }}>TOTAL</th>}
               {reveal && <th style={{ width: 150 }} />}
             </tr>
           </thead>
@@ -103,7 +109,7 @@ export default function Presenter() {
                 <tr key={`e${idx}`} className="empty">
                   <td className="dim">{idx + 1}</td><td className="l dim">—</td><td className="l" />
                   {QUESTIONS.map((q) => <td key={q.id}><div className="cell" style={{ opacity: .35 }} /></td>)}
-                  <td /><td />{reveal && <><td className="sys" /><td className="sys" /></>}{reveal && <td />}{reveal && <td />}
+                  <td /><td />{reveal && <><td className="sys" /><td className="sys" /></>}{reveal && <td />}{reveal && game?.round > 1 && <td />}{reveal && <td />}
                 </tr>
               )
               const [tid, t] = row
@@ -145,6 +151,7 @@ export default function Presenter() {
                     </td>
                   )}
                   {reveal && <td className="score">{s.total}</td>}
+                  {reveal && game?.round > 1 && <td className="score" style={{ color: '#fff', fontWeight: 600 }}>{(t.totalScore || 0) + (t.submitted ? s.total : 0)}</td>}
                   {reveal && <td><button className="btn" style={{ padding: '6px 10px', fontSize: 11, whiteSpace: 'nowrap' }} onClick={() => setModal(tid)} disabled={!c}>Explanation ▸</button></td>}
                 </tr>
               )

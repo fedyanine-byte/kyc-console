@@ -56,8 +56,39 @@ export async function startGame() {
   const ids = shuffle(Object.keys(teams))
   const others = shuffle(CASES.map((c) => c.id).filter((id) => !MUST_INCLUDE.includes(id)))
   const pool = ids.length >= 2 ? [...shuffle(MUST_INCLUDE), ...others] : [...others, ...MUST_INCLUDE]
-  const upd = { phase: 'play', startedAt: Date.now() }
-  ids.forEach((tid, i) => { upd[`teams/${tid}/caseId`] = pool[i % pool.length] })
+  const upd = { phase: 'play', startedAt: Date.now(), round: 1 }
+  const used = []
+  ids.forEach((tid, i) => { const cid = pool[i % pool.length]; upd[`teams/${tid}/caseId`] = cid; used.push(cid) })
+  upd.used = used
+  await update(ref(db, ROOT), upd)
+}
+
+// next round: same teams, new clients nobody in the room has seen yet (if possible)
+export async function nextRound() {
+  const snap = await get(ref(db, ROOT))
+  const g = snap.val() || {}
+  const teams = g.teams || {}
+  const ids = shuffle(Object.keys(teams))
+  const playedByRoom = new Set([...(g.used || []), ...Object.values(teams).map((t) => t.caseId).filter(Boolean)])
+  const all = CASES.map((c) => c.id)
+  const fresh = shuffle(all.filter((id) => !playedByRoom.has(id)))
+  const upd = { phase: 'play', startedAt: Date.now(), round: (g.round || 1) + 1 }
+  const taken = new Set()
+  ids.forEach((tid) => {
+    const t = teams[tid]
+    const s = score(t)
+    const hist = [...(t.history || []), ...(t.caseId ? [t.caseId] : [])]
+    // 1) a client nobody has seen; 2) else one this team hasn't seen; 3) else any
+    let cid = fresh.find((id) => !taken.has(id))
+    if (!cid) cid = shuffle(all).find((id) => !taken.has(id) && !hist.includes(id))
+    if (!cid) cid = shuffle(all).find((id) => !taken.has(id)) || all[0]
+    taken.add(cid)
+    upd[`teams/${tid}`] = {
+      name: t.name, joinedAt: t.joinedAt || 0, caseId: cid, history: hist,
+      totalScore: (t.totalScore || 0) + (t.caseId && t.submitted ? s.total : 0),
+    }
+  })
+  upd.used = [...playedByRoom, ...taken]
   await update(ref(db, ROOT), upd)
 }
 
