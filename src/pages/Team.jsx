@@ -9,6 +9,9 @@ export default function Team() {
   const game = useGame()
   const me = myTeam()
   const [open, setOpen] = useState(null)
+  const [arm, setArm] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [err, setErr] = useState('')
 
   const team = game && me ? game.teams?.[me.id] : null
   useEffect(() => {
@@ -138,12 +141,21 @@ export default function Team() {
           ))}
         </div>
         {!team.submitted && (
-          <button className="btn solid" style={{ width: '100%', marginTop: 16, padding: 14 }}
-            disabled={!allRated || !team.risk || !team.decision || locked}
-            onClick={() => { if (confirm('Submit final decision? You cannot change it afterwards.')) writeTeam(me.id, { submitted: true, submittedAt: Date.now() }) }}>
-            Submit decision
+          <button className="btn solid"
+            disabled={!allRated || !team.risk || !team.decision || locked || sending}
+            onClick={async () => {
+              if (!arm) { setArm(true); setTimeout(() => setArm(false), 5000); return }
+              setSending(true); setErr('')
+              try { await writeTeam(me.id, { submitted: true, submittedAt: Date.now() }) }
+              catch (x) { setErr('Not sent — check your connection and tap again.') }
+              setSending(false); setArm(false)
+            }}
+            style={arm ? { width: '100%', marginTop: 16, padding: 14, background: 'var(--amber)' } : { width: '100%', marginTop: 16, padding: 14 }}>
+            {sending ? 'Sending…' : arm ? 'Tap again to confirm — final' : 'Submit decision'}
           </button>
         )}
+        {err && <p className="mono" style={{ color: 'var(--red)', textAlign: 'center', marginTop: 12, fontSize: 13 }}>{err}</p>}
+        {!team.submitted && allRated && (!team.risk || !team.decision) && <p className="mono dim" style={{ textAlign: 'center', marginTop: 12, fontSize: 12 }}>Choose overall risk and a decision to submit</p>}
         {team.submitted && <p className="mono glow" style={{ textAlign: 'center', marginTop: 16, fontSize: 13 }}>✓ SUBMITTED — wait for the reveal</p>}
         {!team.submitted && phase === 'locked' && <p className="mono" style={{ color: 'var(--amber)', textAlign: 'center', marginTop: 16, fontSize: 13 }}>Time is up — answers locked</p>}
       </div>
