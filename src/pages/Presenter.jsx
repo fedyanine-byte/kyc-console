@@ -88,10 +88,11 @@ export default function Presenter() {
             <tr>
               <th style={{ width: 28 }}>#</th>
               <th className="l" style={{ width: 150 }}>TEAM</th>
-              <th className="l" style={{ width: 290 }}>APPLICANT</th>
+              <th className="l" style={{ width: reveal ? 230 : 290 }}>APPLICANT</th>
               {QUESTIONS.map((q) => <th key={q.id} title={q.text}>{q.id}<br /><span style={{ fontSize: 9 }}>{q.short}</span></th>)}
               <th style={{ width: 80 }}>RISK</th>
               <th style={{ width: 110 }}>DECISION</th>
+              {reveal && <th className="sys-h" colSpan={2}>◆ SYSTEM VERDICT</th>}
               {reveal && <th style={{ width: 60 }}>SCORE</th>}
               {reveal && <th style={{ width: 150 }} />}
             </tr>
@@ -102,7 +103,7 @@ export default function Presenter() {
                 <tr key={`e${idx}`} className="empty">
                   <td className="dim">{idx + 1}</td><td className="l dim">—</td><td className="l" />
                   {QUESTIONS.map((q) => <td key={q.id}><div className="cell" style={{ opacity: .35 }} /></td>)}
-                  <td /><td />{reveal && <td />}{reveal && <td />}
+                  <td /><td />{reveal && <><td className="sys" /><td className="sys" /></>}{reveal && <td />}{reveal && <td />}
                 </tr>
               )
               const [tid, t] = row
@@ -133,6 +134,16 @@ export default function Presenter() {
                       ? <span className="tag" style={{ color: DEC_COLOR[t.decision], borderColor: DEC_COLOR[t.decision], boxShadow: `0 0 10px ${DEC_COLOR[t.decision]}55`, minWidth: 96 }}>{DEC_LABEL[t.decision]}{reveal && c ? (decOk(c, t.decision) ? ' ✓' : ' ✗') : ''}</span>
                       : <span className="dim">{t.decision ? '…' : '·'}</span>}
                   </td>
+                  {reveal && (
+                    <td className="sys">
+                      {c && <span className="tag" style={{ color: '#000', background: RISK_COLOR[c.risk], borderColor: RISK_COLOR[c.risk] }}>{RISK_LABEL[c.risk]}</span>}
+                    </td>
+                  )}
+                  {reveal && (
+                    <td className="sys">
+                      {c && <span className="tag" style={{ color: '#000', background: DEC_COLOR[c.decision], borderColor: DEC_COLOR[c.decision], minWidth: 96 }}>{DEC_LABEL[c.decision]}</span>}
+                    </td>
+                  )}
                   {reveal && <td className="score">{s.total}</td>}
                   {reveal && <td><button className="btn" style={{ padding: '6px 10px', fontSize: 11, whiteSpace: 'nowrap' }} onClick={() => setModal(tid)} disabled={!c}>Explanation ▸</button></td>}
                 </tr>

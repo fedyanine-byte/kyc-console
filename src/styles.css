@@ -109,3 +109,10 @@ input { font-family: var(--mono); }
 .scan { position: relative; overflow: hidden; }
 .scan::after { content: ''; position: absolute; left: 0; right: 0; height: 40%; top: -40%; background: linear-gradient(180deg, transparent, rgba(45,226,255,.06), transparent); animation: scan 4s linear infinite; pointer-events: none; }
 @keyframes scan { to { top: 100%; } }
+
+/* system verdict columns (reveal) */
+.grid th.sys-h { color: var(--cyan); font-weight: 600; letter-spacing: .16em; background: rgba(45,226,255,.10); border: 1px solid rgba(45,226,255,.45); border-bottom: none; border-radius: 6px 6px 0 0; text-shadow: 0 0 8px rgba(45,226,255,.6); }
+.grid td.sys { background: rgba(45,226,255,.09); border-top-color: rgba(45,226,255,.45); border-bottom-color: rgba(45,226,255,.45); }
+.grid td.sys + td.sys { border-right: 1px solid rgba(45,226,255,.45); }
+.grid td:not(.sys) + td.sys { border-left: 1px solid rgba(45,226,255,.45); }
+.grid td.sys .tag { font-weight: 700; box-shadow: 0 0 12px rgba(45,226,255,.25); }
