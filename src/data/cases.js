@@ -311,7 +311,7 @@ export const CASES = [
     answers: [
       L('Directors\' passports; Curaçao company registration.'),
       Mm('Curaçao; operations team in Cyprus.', 'Offshore gambling hub.'),
-      Mm('Online casino: slots and live dealer games.', 'Gambling — high-risk sector (MCC 7995).'),
+      H('Online casino: slots and live dealer games.', 'Online gambling is covered by AML law and treated as a high-risk sector (card code MCC 7995).'),
       H('Collect player deposits from Latvia and other EU countries; pay winnings.', 'Targeting Latvian players requires a Latvian licence.'),
       Mm('€3–5 million a month in deposits.', ''),
       Mm('Players in the EU; game providers in Malta; affiliates worldwide.', ''),
@@ -402,7 +402,7 @@ export const CASES = [
     answers: [
       L('Director\'s passport; Enterprise Register extract.'),
       L('Riga, Latvia — shop with vault.'),
-      Mm('Investment gold bars, coins; buys scrap gold from the public.', 'Precious metals — high-risk sector under AML law.'),
+      H('Investment gold bars, coins; buys scrap gold from the public.', 'Precious-metal dealers are covered by AML law and rated high-risk in EU risk assessments; buying scrap gold from the public adds cash and stolen-goods risk.'),
       L('Buy gold from wholesalers, receive client payments.'),
       Mm('€600,000–900,000.', ''),
       Mm('Wholesalers in Switzerland and Germany; recently a supplier in the UAE.', 'Gold from the UAE — known transit point for sanctioned and conflict gold.'),
